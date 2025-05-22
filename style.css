@@ -34,3 +34,6 @@ img {
 .lista-animali {
   width: 100%;
 }
+.lista-animali summary > h2 {
+  display: inline;
+}
