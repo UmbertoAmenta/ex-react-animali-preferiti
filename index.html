@@ -15,24 +15,69 @@
       const { useState } = React;
       const listaAnimali = document.querySelector(".lista-animali");
 
+      function Modal({
+        title,
+        content,
+        show = false,
+        onClose = () => {},
+        onConfirm = () => {},
+      }) {
+        return (
+          show &&
+          ReactDOM.createPortal(
+            <div className="modal-container">
+              <div className="modal">
+                <h2>{title}</h2>
+                {content}
+                <div>
+                  <button onClick={onClose}>Annulla</button>
+                  <button onClick={onConfirm}>Conferma</button>
+                </div>
+              </div>
+            </div>,
+            document.body
+          )
+        );
+      }
+
       const ReactApp = () => {
         const [animals, setAnimals] = useState([]);
-        const animalsChoices = [
-          "Cane",
-          "Gatto",
-          "Pappagallo",
-          "Cavallo",
-          "Panda",
-        ];
-        const addCasualAnimal = () => {
-          const randomIndex = Math.floor(Math.random() * animalsChoices.length);
-          const casualAnimal = animalsChoices[randomIndex];
-          setAnimals((prev) => [...prev, casualAnimal]);
+        const [showModal, setShowModal] = useState(false);
+        const [inputAnimal, setInputAnimal] = useState("");
+
+        const openModal = () => {
+          setInputAnimal("");
+          setShowModal(true);
+        };
+
+        const closeModal = () => {
+          setShowModal(false);
+        };
+
+        const confirmModal = () => {
+          if (inputAnimal !== "") {
+            setAnimals((list) => [...list, inputAnimal]);
+          }
+          setShowModal(false);
         };
 
         return (
           <>
-            <button onClick={addCasualAnimal}>Aggiungi Animale</button>
+            <Modal
+              title="Aggiungi un animale"
+              show={showModal}
+              onClose={closeModal}
+              onConfirm={confirmModal}
+              content={
+                <input
+                  type="text"
+                  placeholder="Nome animale"
+                  value={inputAnimal}
+                  onChange={(e) => setInputAnimal(e.target.value)}
+                />
+              }
+            />
+            <button onClick={openModal}>Aggiungi Animale</button>
             <details>
               <summary>
                 <h2>Animali</h2>
