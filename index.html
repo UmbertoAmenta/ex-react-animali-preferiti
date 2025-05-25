@@ -44,23 +44,53 @@
         const [animals, setAnimals] = useState([]);
         const [showModal, setShowModal] = useState(false);
         const [inputAnimal, setInputAnimal] = useState("");
+        const [loading, setLoading] = useState(false);
+        const [error, setError] = useState(null);
 
         const openModal = () => {
           setInputAnimal("");
+          setError(null);
           setShowModal(true);
         };
 
         const closeModal = () => {
           setShowModal(false);
+          setError(null);
+          setLoading(false);
         };
 
-        const confirmModal = () => {
-          if (inputAnimal !== "") {
-            setAnimals((list) => [...list, inputAnimal]);
+        const confirmModal = async () => {
+          if (!inputAnimal.trim()) return;
+          setLoading(true);
+          setError(null);
+          try {
+            const res = await fetch(
+              `http://localhost:5000/animals?search=${inputAnimal}`
+            );
+            const data = await res.json();
+            if (!Array.isArray(data) || data.length === 0) {
+              setError("Nessun animale trovato");
+              setLoading(false);
+              return;
+            }
+            const animal = data[0];
+            setAnimals((list) => [
+              ...list,
+              {
+                name: animal.name,
+                description:
+                  animal.description || "Descrizione non disponibile",
+                image:
+                  animal.image || "https://placehold.co/200x200?text=No+Image",
+              },
+            ]);
+            setShowModal(false);
+          } catch (e) {
+            setError(`Errore: ${e.message}`);
+          } finally {
+            setLoading(false);
           }
-          setShowModal(false);
         };
-
         return (
           <>
             <Modal
@@ -69,12 +99,16 @@
               onClose={closeModal}
               onConfirm={confirmModal}
               content={
-                <input
-                  type="text"
-                  placeholder="Nome animale"
-                  value={inputAnimal}
-                  onChange={(e) => setInputAnimal(e.target.value)}
-                />
+                <div>
+                  <input
+                    type="text"
+                    placeholder="Nome animale"
+                    value={inputAnimal}
+                    onChange={(e) => setInputAnimal(e.target.value)}
+                  />
+                  {loading && <p>Caricamento...</p>}
+                  {error && <p>{error}</p>}
+                </div>
               }
             />
             <button onClick={openModal}>Aggiungi Animale</button>
@@ -82,11 +116,20 @@
               <summary>
                 <h2>Animali</h2>
               </summary>
-              <ul>
+              <div className="cards">
                 {animals.map((a, i) => (
-                  <li key={i}>{a}</li>
+                  <div key={i} className="card">
+                    <h3>{a.name}</h3>
+                    <img
+                      src={
+                        a.image || "https://placehold.co/200x200?text=No+Image"
+                      }
+                      alt={a.name}
+                    />
+                    <p>{a.description}</p>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </details>
           </>
         );

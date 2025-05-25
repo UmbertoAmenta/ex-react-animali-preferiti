@@ -53,3 +53,16 @@ img {
   padding: 20px;
   border-radius: 5px;
 }
+.cards {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.card {
+  padding: 10px 20px;
+  border: 1px solid black;
+  border-radius: 10px;
+  width: 200px;
+}
